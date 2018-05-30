@@ -7,7 +7,7 @@ enum class AEvent
     Close
 };
 
-class A : public em::EventManager<AEvent, A>
+class A : public em::EventManager<AEvent, A *>
 {
   public:
     A()

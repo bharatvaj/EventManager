@@ -7,21 +7,29 @@ enum class AEvent {
     Start,
     Close
 };
-class A : public EventManager<AEvent, int>{
-    public:
-    A(){
+class A : public em::EventManager<AEvent, A *>
+{
+  public:
+    A()
+    {
     }
-    void run(){
-        fireEvent(AEvent::Start, 0);
-        fireEvent(AEvent::Close, 100);
+    void start()
+    {
+        fireEvent(AEvent::Start, this);
+    }
+    void exit()
+    {
+        fireEvent(AEvent::Close, this);
     }
 };
 
-void onStart(int val){
+void onStart(A* a)
+{
     //do something on start of A
 }
 
-void onClose(int val){
+void onClose(A *a)
+{
     //do something on close of A
 }
 
