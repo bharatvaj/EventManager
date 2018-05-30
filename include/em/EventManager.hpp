@@ -3,11 +3,13 @@
 #include <iostream>
 #include <functional>
 #include <map>
+
 namespace em
 {
 template <class Event, class EventCallbackType>
 class EventManager
 {
+  public:
     typedef std::function<void(EventCallbackType *)> EventCallback;
 
   private:
@@ -17,9 +19,17 @@ class EventManager
     EventManager()
     {
     }
+
     void addEventHandler(Event event, EventCallback callback)
     {
         events[event] = callback;
+    }
+
+    template <class T>
+    void addEventHandler(Event event, T *const object, void (T::*callback)(EventCallbackType *))
+    {
+        using namespace std::placeholders;
+        events[event] = std::bind(callback, object, _1);
     }
 
     void fireEvent(Event event, EventCallbackType *t)

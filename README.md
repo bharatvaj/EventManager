@@ -33,3 +33,33 @@ int main(int argc, char *argvp[]){
     return 0;
 }
 ```
+
+### Callbacks within classes
+```cpp
+class B
+{
+    void onStart(A *v)
+    {
+        std::cout << "B::onStart" << std::endl;
+    }
+
+    void onClose(A *v)
+    {
+        std::cout << "B::Exit" << std::endl;
+    }
+
+  public:
+    B()
+    {
+        A *v = new A();
+        v->addEventHandler(AEvent::Start, this, &B::onStart);
+        v->addEventHandler(AEvent::Close, this, &B::onClose);
+        v->start();
+        v->exit();
+    }
+};
+```
+Since the member-to-pointer needs object, the addEventHandler method is changed on class callbacks as,
+```cpp
+v->addEventHandler(AEvent::Close, this, &B::onClose);
+```

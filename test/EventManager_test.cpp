@@ -1,50 +1,53 @@
 #include <iostream>
 #include <em/EventManager.hpp>
 
-using namespace em;
-
 enum class AEvent
 {
     Start,
     Close
 };
-class ProcessA : public EventManager<AEvent, int>
+
+class A : public em::EventManager<AEvent, A>
 {
   public:
-    ProcessA()
+    A()
     {
-        fireEvent(AEvent::Start, new int(0));
     }
-    ~ProcessA()
+    void start()
     {
-        fireEvent(AEvent::Close, new int(100));
+        fireEvent(AEvent::Start, this);
+    }
+    void exit()
+    {
+        fireEvent(AEvent::Close, this);
     }
 };
 
-class ProcessB
+class B
 {
-    void onStart(int val)
+    void onStart(A *v)
     {
-        std::cout << "A started with val: " << val << std::endl;
+        std::cout << "B::onStart" << std::endl;
     }
 
-    void onClose(int val)
+    void onClose(A *v)
     {
-        std::cout << "A closed with val: " << val << std::endl;
+        std::cout << "B::Exit" << std::endl;
     }
 
   public:
-    ProcessB()
+    B()
     {
-        ProcessA a;
-        //using namespace std::placeholders;
-        //auto fun = std::bind(&ProcessB::onStart, this, _1);
-        //a.addEventHandler(AEvent::Start, fun);
+        A *v = new A();
+        v->addEventHandler(AEvent::Start, this, &B::onStart);
+        v->addEventHandler(AEvent::Close, this, &B::onClose);
+        v->start();
+        v->exit();
     }
 };
 
 int main(int argc, char *argv[])
 {
-    ProcessB b;
+    B tn;
     return 0;
 }
