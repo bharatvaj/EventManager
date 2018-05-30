@@ -38,12 +38,12 @@ int main(int argc, char *argvp[]){
 ```cpp
 class B
 {
-    void onStart(A *v)
+    void onStart(A *a)
     {
         std::cout << "B::onStart" << std::endl;
     }
 
-    void onClose(A *v)
+    void onClose(A *a)
     {
         std::cout << "B::Exit" << std::endl;
     }
@@ -51,11 +51,11 @@ class B
   public:
     B()
     {
-        A *v = new A();
-        v->addEventHandler(AEvent::Start, this, &B::onStart);
-        v->addEventHandler(AEvent::Close, this, &B::onClose);
-        v->start();
-        v->exit();
+        A *a = new A();
+        a->addEventHandler(AEvent::Start, this, &B::onStart);
+        a->addEventHandler(AEvent::Close, this, &B::onClose);
+        a->start();
+        a->exit();
     }
 };
 ```

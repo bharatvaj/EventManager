@@ -25,12 +25,12 @@ class A : public em::EventManager<AEvent, A>
 
 class B
 {
-    void onStart(A *v)
+    void onStart(A *a)
     {
         std::cout << "B::onStart" << std::endl;
     }
 
-    void onClose(A *v)
+    void onClose(A *a)
     {
         std::cout << "B::Exit" << std::endl;
     }
@@ -38,16 +38,24 @@ class B
   public:
     B()
     {
-        A *v = new A();
-        v->addEventHandler(AEvent::Start, this, &B::onStart);
-        v->addEventHandler(AEvent::Close, this, &B::onClose);
-        v->start();
-        v->exit();
+        A *a = new A();
+        a->addEventHandler(AEvent::Start, this, &B::onStart);
+        a->addEventHandler(AEvent::Close, this, &B::onClose);
+        a->start();
+        a->exit();
     }
 };
 
+void onStart(A *a)
+{
+    std::cout << "::onStart" << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
-    B tn;
+    B b;
+    A a;
+    a.addEventHandler(AEvent::Start, onStart);
+    a.start();
     return 0;
 }
