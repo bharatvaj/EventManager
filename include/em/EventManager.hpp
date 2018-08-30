@@ -6,11 +6,11 @@
 
 namespace em
 {
-template <class Event, class EventCallbackType>
+template <class Event, typename... EventCallbackType>
 class EventManager
 {
   public:
-    typedef std::function<void(EventCallbackType)> EventCallback;
+    typedef std::function<void(EventCallbackType...)> EventCallback;
 
   private:
     std::map<Event, EventCallback> events;
@@ -26,18 +26,18 @@ class EventManager
     }
 
     template <class T>
-    void addEventHandler(Event event, T *const object, void (T::*callback)(EventCallbackType))
+    void addEventHandler(Event event, T *const object, void (T::*callback)(EventCallbackType...))
     {
         using namespace std::placeholders;
         events[event] = std::bind(callback, object, _1);
     }
 
-    void fireEvent(Event event, EventCallbackType t)
+    void fireEvent(Event event, EventCallbackType... t)
     {
         if (events[event] == nullptr)
             return;
         EventCallback callback = events[event];
-        callback(t);
+        callback(t...);
     }
 };
 }
