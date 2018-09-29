@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.0)
 
-project(EventManager VERSION 0.1)
+project(EventManager VERSION 0.5)
 file(GLOB_RECURSE em_HDRS "include/*.hpp")
 
 add_executable(EventManager test/EventManager_test.cpp )
