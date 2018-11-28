@@ -4,7 +4,7 @@
 enum class AEvent
 {
     Start,
-    Close
+    Exit
 };
 
 class A : public em::EventManager<AEvent, A *>
@@ -19,7 +19,7 @@ class A : public em::EventManager<AEvent, A *>
     }
     void exit()
     {
-        fireEvent(AEvent::Close, this);
+        fireEvent(AEvent::Exit, this);
     }
 };
 
@@ -30,9 +30,9 @@ class B
         std::cout << "B::onStart" << std::endl;
     }
 
-    void onClose(A *a)
+    void onExit(A *a)
     {
-        std::cout << "B::Exit" << std::endl;
+        std::cout << "B::onExit" << std::endl;
     }
 
   public:
@@ -40,7 +40,7 @@ class B
     {
         A *a = new A();
         a->addEventHandler(AEvent::Start, this, &B::onStart);
-        a->addEventHandler(AEvent::Close, this, &B::onClose);
+        a->addEventHandler(AEvent::Exit, this, &B::onExit);
         a->start();
         a->exit();
     }
@@ -51,11 +51,17 @@ void onStart(A *a)
     std::cout << "::onStart" << std::endl;
 }
 
+void onExit(A *a){
+  std::cout << "::onExit" << std::endl;
+}
+
 int main(int argc, char *argv[])
 {
     B b;
     A a;
-    a.addEventHandler(AEvent::Start, onStart);
+    a.addEventHandler(em::event::ANY, onStart);
+    a.addEventHandler(AEvent::Exit, onExit);
     a.start();
+    a.exit();
     return 0;
 }

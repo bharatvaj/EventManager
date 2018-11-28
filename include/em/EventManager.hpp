@@ -6,6 +6,11 @@
 
 namespace em
 {
+enum class event {
+  ANY,
+  ALL
+};
+
 template <class Event, typename... EventCallbackType>
 class EventManager
 {
@@ -14,6 +19,7 @@ class EventManager
 
   private:
     std::map<Event, EventCallback> events;
+    EventCallback anyCallback = nullptr;
 
   public:
     EventManager()
@@ -32,12 +38,33 @@ class EventManager
         events[event] = std::bind(callback, object, _1);
     }
 
+    template <class T>
+    void addEventHandler(em::event, T *const object, void (T::*callback)(EventCallbackType...))
+    {
+        using namespace std::placeholders;
+        anyCallback = std::bind(callback, object, _1);
+    }
+
+    void addEventHandler(em::event, EventCallback callback){
+      using namespace std::placeholders;
+      anyCallback = callback;
+    }
+
     void fireEvent(Event event, EventCallbackType... t)
     {
+        if(anyCallback != nullptr){
+            anyCallback(t...);
+        }
         if (events[event] == nullptr)
             return;
         EventCallback callback = events[event];
         callback(t...);
+    }
+
+    void fireEvent(em::event event, EventCallbackType... t){
+      if(anyCallback == nullptr)
+        return;
+      anyCallback(t...);
     }
 };
 }
