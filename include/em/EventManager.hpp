@@ -7,8 +7,7 @@
 namespace em
 {
 enum class event {
-  ANY,
-  ALL
+  ANY
 };
 
 template <class Event, typename... EventCallbackType>
@@ -26,26 +25,26 @@ class EventManager
     {
     }
 
-    void addEventHandler(Event event, EventCallback callback)
+    void on(Event event, EventCallback callback)
     {
         events[event] = callback;
     }
 
     template <class T>
-    void addEventHandler(Event event, T *const object, void (T::*callback)(EventCallbackType...))
+    void on(Event event, T *const object, void (T::*callback)(EventCallbackType...))
     {
         using namespace std::placeholders;
         events[event] = std::bind(callback, object, _1);
     }
 
     template <class T>
-    void addEventHandler(em::event, T *const object, void (T::*callback)(EventCallbackType...))
+    void on(em::event, T *const object, void (T::*callback)(EventCallbackType...))
     {
         using namespace std::placeholders;
         anyCallback = std::bind(callback, object, _1);
     }
 
-    void addEventHandler(em::event, EventCallback callback){
+    void on(em::event, EventCallback callback){
       using namespace std::placeholders;
       anyCallback = callback;
     }

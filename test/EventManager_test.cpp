@@ -39,8 +39,8 @@ class B
     B()
     {
         A *a = new A();
-        a->addEventHandler(AEvent::Start, this, &B::onStart);
-        a->addEventHandler(AEvent::Exit, this, &B::onExit);
+        a->on(AEvent::Start, this, &B::onStart);
+        a->on(AEvent::Exit, this, &B::onExit);
         a->start();
         a->exit();
     }
@@ -59,8 +59,8 @@ int main(int argc, char *argv[])
 {
     B b;
     A a;
-    a.addEventHandler(em::event::ANY, onStart);
-    a.addEventHandler(AEvent::Exit, onExit);
+    a.on(em::event::ANY, onStart);
+    a.on(AEvent::Exit, onExit);
     a.start();
     a.exit();
     return 0;
