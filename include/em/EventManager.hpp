@@ -25,28 +25,32 @@ class EventManager
     {
     }
 
-    void on(Event event, EventCallback callback)
+    EventManager &on(Event event, EventCallback callback)
     {
         events[event] = callback;
+	return *this;
     }
 
     template <class T>
-    void on(Event event, T *const object, void (T::*callback)(EventCallbackType...))
+    EventManager &on(Event event, T *const object, void (T::*callback)(EventCallbackType...))
     {
         using namespace std::placeholders;
         events[event] = std::bind(callback, object, _1);
+        return *this;
     }
 
     template <class T>
-    void on(em::event, T *const object, void (T::*callback)(EventCallbackType...))
+    EventManager &on(em::event, T *const object, void (T::*callback)(EventCallbackType...))
     {
         using namespace std::placeholders;
         anyCallback = std::bind(callback, object, _1);
+        return *this;
     }
 
-    void on(em::event, EventCallback callback){
+    EventManager &on(em::event, EventCallback callback){
       using namespace std::placeholders;
       anyCallback = callback;
+      return *this;
     }
 
     void fireEvent(Event event, EventCallbackType... t)
