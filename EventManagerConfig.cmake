@@ -1,5 +1,0 @@
-find_path(EM_INCLUDE_DIR EventManager.hpp PATH_SUFFIXES /usr/local/include/em /usr/include/em $ENV{EventManager_DIR}/include/em)
-set(EM_FOUND "NO")
-if(EM_INCLUDE_DIR)
-	set(EM_FOUND "YES")
-endif()
