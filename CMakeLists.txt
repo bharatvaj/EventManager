@@ -13,15 +13,6 @@ target_include_directories(EventManager INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(WARNINGS "-Werror" "-Wall")
-elseif(CMAKE_CXX_COMPILER_ID MATCHES "Clang")
-    set(WARNINGS "-Werror" "-Wall")
-elseif(MSVC)
-    set(WARNINGS "/WX" "/W4")
-endif()
-target_compile_options(EventManager INTERFACE ${WARNINGS})
-
 if (${CMAKE_SOURCE_DIR} STREQUAL ${CMAKE_CURRENT_SOURCE_DIR})
 
 include(GNUInstallDirs)
