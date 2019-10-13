@@ -9,6 +9,12 @@ if(NOT CMAKE_BUILD_TYPE)
 endif()
 
 add_library(EventManager INTERFACE)
+target_compile_features(EventManager
+    INTERFACE
+      cxx_variadic_templates
+      cxx_nullptr
+      cxx_lambdas
+)
 target_include_directories(EventManager INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>)

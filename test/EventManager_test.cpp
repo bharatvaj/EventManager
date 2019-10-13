@@ -17,6 +17,7 @@ class A : public em::EventManager<AEvent, A *>
     {
         fireEvent(AEvent::Start, this);
     }
+
     void exit()
     {
         fireEvent(AEvent::Exit, this);
@@ -59,7 +60,7 @@ int main(int argc, char *argv[])
 {
     B b;
     A a;
-    a.on(em::event::ANY, onStart);
+    a.on(em::event::EVERY, onStart);
     a.on(AEvent::Exit, onExit);
     a.start();
     a.exit();

@@ -7,18 +7,19 @@
 namespace em
 {
 enum class event {
-  ANY
+  EVERY
 };
 
 template <class Event, typename... EventCallbackType>
 class EventManager
 {
   public:
-    typedef std::function<void(EventCallbackType...)> EventCallback;
+    using EventCallback = std::function<void(EventCallbackType...)>;
 
   private:
     std::map<Event, EventCallback> events;
-    EventCallback anyCallback = nullptr;
+    std::map<Event, void *> customEvents;
+    EventCallback everyCallback = nullptr;
 
   public:
     EventManager()
@@ -28,7 +29,14 @@ class EventManager
     EventManager &on(Event event, EventCallback callback)
     {
         events[event] = callback;
-	return *this;
+        return *this;
+    }
+
+    template <class CustomEventCallback>
+    EventManager &on(Event event, CustomEventCallback callback)
+    {
+        customEvents[event] = (void *)callback;
+        return *this;
     }
 
     template <class T>
@@ -39,35 +47,55 @@ class EventManager
         return *this;
     }
 
+    template <class T, class... CustomEventCallbackType>
+    EventManager&on (Event event, T *const object, void (T::*callback)(CustomEventCallbackType...))
+    {
+        using namespace std::placeholders;
+        customEvents[event] = std::bind(callback, object, _1);
+        return *this;
+    }
+
     template <class T>
     EventManager &on(em::event, T *const object, void (T::*callback)(EventCallbackType...))
     {
         using namespace std::placeholders;
-        anyCallback = std::bind(callback, object, _1);
+        everyCallback = std::bind(callback, object, _1);
         return *this;
     }
 
     EventManager &on(em::event, EventCallback callback){
       using namespace std::placeholders;
-      anyCallback = callback;
+      everyCallback = callback;
       return *this;
     }
 
     void fireEvent(Event event, EventCallbackType... t)
     {
-        if(anyCallback != nullptr){
-            anyCallback(t...);
+        if(everyCallback != nullptr){
+            everyCallback(t...);
         }
-        if (events[event] == nullptr)
-            return;
-        EventCallback callback = events[event];
-        callback(t...);
+        if (events[event] != nullptr){
+            events[event](t...);
+        }
+    }
+
+    template <class... CustomEventCallbackType>
+    void fireEvent(Event event, CustomEventCallbackType... t)
+    {
+        using CustomEventCallback = std::function<void(CustomEventCallbackType...)>;
+        // if(everyCallback != nullptr){
+        //     everyCallback(t...);
+        // }
+        if (customEvents[event] != nullptr){
+            CustomEventCallback *cb = (CustomEventCallback*)customEvents[event];
+            (*cb)(t...);
+        }
     }
 
     void fireEvent(em::event event, EventCallbackType... t){
-      if(anyCallback == nullptr)
+      if(everyCallback == nullptr)
         return;
-      anyCallback(t...);
+      everyCallback(t...);
     }
 };
 }
