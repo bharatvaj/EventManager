@@ -9,21 +9,33 @@ struct Data {
     int i;
 };
 
-class A : public em::EventManager<AState, Data> {
+class A : public em::EventManager<AState> {
     public:
     void read(){
-        fireEvent(AState::READ, {5});
+        fireEvent<std::string>(AState::READ, std::string("Read"));
     }
     void complete(){
-        fireEvent(AState::COMPLETE, 0, 0);        
+        fireEvent(AState::COMPLETE, std::string("Complete"));
+        fireEvent<Data>(AState::COMPLETE, {10});
     }
 };
 
+void fn(std::string status){
+    std::cout << status << std::endl;
+}
+
+void fnd(Data d){
+    std::cout << d.i << std::endl;    
+}
+
 int main(int argc, char* argv[]){
     A a;
-    // a.on(AState::COMPLETE, [](int status){
+    a.on<Data>(AState::COMPLETE, fnd);
+    a.on<std::string>(AState::READ, fn);
+    // a.on<std::string>(AState::COMPLETE, [](std::string status){
     //     std::cout << status << std::endl;
     // });
+    a.read();
     a.complete();
     return 0;
 }

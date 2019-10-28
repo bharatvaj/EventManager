@@ -2,7 +2,9 @@
 #define _EVENT_MANAGER
 #include <iostream>
 #include <functional>
+#include <vector>
 #include <map>
+#include <typeinfo>
 
 namespace em
 {
@@ -10,93 +12,60 @@ enum class event {
   EVERY
 };
 
-template <class Event, typename... EventCallbackType>
+template <class Event>
 class EventManager
 {
   public:
-    using EventCallback = std::function<void(EventCallbackType...)>;
 
   private:
-    std::map<Event, EventCallback> events;
-    std::map<Event, void *> customEvents;
-    EventCallback everyCallback = nullptr;
+    std::map<Event, std::vector<std::pair<std::size_t, void*>>> events;
+    std::vector<void*> everyCallback;
 
   public:
     EventManager()
     {
     }
 
-    EventManager &on(Event event, EventCallback callback)
+    template <class... T>
+    EventManager &on(Event event, void(*callback)(T...))
     {
-        events[event] = callback;
+        using CustomEventCallback = std::function<void(T...)>;
+        events[event].push_back(std::make_pair(typeid(callback).hash_code(), (void*)new CustomEventCallback(callback)));
         return *this;
     }
 
-    template <class CustomEventCallback>
-    EventManager &on(Event event, CustomEventCallback callback)
-    {
-        customEvents[event] = (void *)callback;
-        return *this;
-    }
+    // template <class T, class... CustomEventCallbackType>
+    // EventManager&on (Event event, T *const object, void (T::*callback)(CustomEventCallbackType...))
+    // {
+    //     using CustomEventCallback = std::function<void(CustomEventCallbackType...)>;
+    //     using namespace std::placeholders;
+    //     customEvents[event] = std::bind(callback, object, _1);
+    //     return *this;
+    // }
 
-    template <class T>
-    EventManager &on(Event event, T *const object, void (T::*callback)(EventCallbackType...))
+    template <class... T>
+    void fireEvent(Event event, T... t)
     {
-        using namespace std::placeholders;
-        events[event] = std::bind(callback, object, _1);
-        return *this;
-    }
-
-    template <class T, class... CustomEventCallbackType>
-    EventManager&on (Event event, T *const object, void (T::*callback)(CustomEventCallbackType...))
-    {
-        using namespace std::placeholders;
-        customEvents[event] = std::bind(callback, object, _1);
-        return *this;
-    }
-
-    template <class T>
-    EventManager &on(em::event, T *const object, void (T::*callback)(EventCallbackType...))
-    {
-        using namespace std::placeholders;
-        everyCallback = std::bind(callback, object, _1);
-        return *this;
-    }
-
-    EventManager &on(em::event, EventCallback callback){
-      using namespace std::placeholders;
-      everyCallback = callback;
-      return *this;
-    }
-
-    void fireEvent(Event event, EventCallbackType... t)
-    {
+        using CustomEventCallback = void (*)(T...);
         if(everyCallback != nullptr){
             everyCallback(t...);
         }
-        if (events[event] != nullptr){
-            events[event](t...);
+        for(std::pair<std::size_t, void*> eventCb : events[event]){
+          if (eventCb.second != nullptr 
+          && eventCb.first == typeid(CustomEventCallback).hash_code()){
+              CustomEventCallback *cb = (CustomEventCallback*)eventCb.second;
+              (*cb)(t...);
+          }
         }
     }
 
-    template <class... CustomEventCallbackType>
-    void fireEvent(Event event, CustomEventCallbackType... t)
-    {
-        using CustomEventCallback = std::function<void(CustomEventCallbackType...)>;
-        // if(everyCallback != nullptr){
-        //     everyCallback(t...);
-        // }
-        if (customEvents[event] != nullptr){
-            CustomEventCallback *cb = (CustomEventCallback*)customEvents[event];
-            (*cb)(t...);
-        }
-    }
-
-    void fireEvent(em::event event, EventCallbackType... t){
-      if(everyCallback == nullptr)
-        return;
-      everyCallback(t...);
-    }
+    // template <class... CustomEventCallbackType>
+    // void fireEvent(em::event event, CustomEventCallbackType... t){
+    //   // if(everyCallback == nullptr)
+    //   //   return;
+    //   // everyCallback(t...);
+    //   // for()
+    // }
 };
 }
 #endif

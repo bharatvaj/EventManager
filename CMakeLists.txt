@@ -49,6 +49,5 @@ install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE" "${CMAKE_CURRENT_SOURCE_DIR}
 
 endif()
 
-if (EVENTMANAGER_TESTS)
-  add_subdirectory(test)
-endif()
+enable_testing()
+add_subdirectory(test)
