@@ -30,11 +30,10 @@ void fnd(Data d){
 
 int main(int argc, char* argv[]){
     A a;
-    a.on<Data>(AState::COMPLETE, fnd);
     a.on<std::string>(AState::READ, fn);
-    // a.on<std::string>(AState::COMPLETE, [](std::string status){
-    //     std::cout << status << std::endl;
-    // });
+    a.on<Data>(AState::COMPLETE, +[](Data d){
+        std::cout << d.i << std::endl;
+    });
     a.read();
     a.complete();
     return 0;

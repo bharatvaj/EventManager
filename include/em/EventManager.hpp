@@ -26,35 +26,38 @@ class EventManager
     {
     }
 
-    template <class... T>
-    EventManager &on(Event event, void(*callback)(T...))
-    {
-        using CustomEventCallback = std::function<void(T...)>;
-        events[event].push_back(std::make_pair(typeid(callback).hash_code(), (void*)new CustomEventCallback(callback)));
-        return *this;
-    }
-
-    // template <class T, class... CustomEventCallbackType>
-    // EventManager&on (Event event, T *const object, void (T::*callback)(CustomEventCallbackType...))
+    // template <class... T>
+    // EventManager &on(Event event, std::function<void(T...)> callback)
     // {
-    //     using CustomEventCallback = std::function<void(CustomEventCallbackType...)>;
-    //     using namespace std::placeholders;
-    //     customEvents[event] = std::bind(callback, object, _1);
+    //     using CustomEventCallback = std::function<void(T...)>;
+    //     events[event].push_back(std::make_pair(typeid(callback).hash_code(), (void*)new CustomEventCallback(callback)));
     //     return *this;
     // }
 
     template <class... T>
+    EventManager &on(Event event, void(*callback)(T...)){
+        events[event].push_back(std::make_pair(typeid(callback).hash_code(), (void*)callback));
+        return *this;
+    }
+
+    template <class P, class... T>
+    EventManager&on (Event event, P *object, void (P::*callback)(T...))
+    {
+        using namespace std::placeholders;
+        events[event].push_back(std::make_pair(typeid(callback).hash_code(), (void*)new std::function<void(T...)>(std::bind(callback, object, _1)) ));
+        return *this;
+    }
+
+    template <class... T>
     void fireEvent(Event event, T... t)
     {
-        using CustomEventCallback = void (*)(T...);
-        if(everyCallback != nullptr){
-            everyCallback(t...);
-        }
+        // if(everyCallback != nullptr){
+        //     everyCallback(t...);
+        // }
         for(std::pair<std::size_t, void*> eventCb : events[event]){
           if (eventCb.second != nullptr 
-          && eventCb.first == typeid(CustomEventCallback).hash_code()){
-              CustomEventCallback *cb = (CustomEventCallback*)eventCb.second;
-              (*cb)(t...);
+          && eventCb.first == typeid(void(*)(T...)).hash_code()){
+              (*(void(*)(T...))eventCb.second)(t...);
           }
         }
     }
